@@ -1,5 +1,8 @@
 package com.example.talatwaraqat;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 
 import androidx.appcompat.app.ActionBar;
@@ -9,6 +12,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageView;
 
 import java.util.Random;
 
@@ -59,7 +65,7 @@ public class FullscreenActivity extends AppCompatActivity {
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
-    private View mControlsView;
+  /*  private View mControlsView;
     private final Runnable mShowPart2Runnable = new Runnable() {
         @Override
         public void run() {
@@ -70,7 +76,7 @@ public class FullscreenActivity extends AppCompatActivity {
             }
             mControlsView.setVisibility(View.VISIBLE);
         }
-    };
+    };*/
     private boolean mVisible;
     private final Runnable mHideRunnable = new Runnable() {
         @Override
@@ -123,24 +129,28 @@ public class FullscreenActivity extends AppCompatActivity {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.imageView0).setOnTouchListener(new View.OnTouchListener() {
+
+        final ImageView imageView0 = (ImageView) findViewById(R.id.imageView0);
+        final ImageView imageView1 = (ImageView) findViewById(R.id.imageView1);
+        final ImageView imageView2 = (ImageView) findViewById(R.id.imageView2);
+        imageView0.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                onImageCardFlip(0);
+                onImageCardFlip(0,imageView0);
                 return false;
             }
         });
-        findViewById(R.id.imageView1).setOnTouchListener(new View.OnTouchListener() {
+        imageView1.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                onImageCardFlip(1);
+                onImageCardFlip(1,imageView1);
                 return false;
             }
         });
-        findViewById(R.id.imageView2).setOnTouchListener(new View.OnTouchListener() {
+        imageView2.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                onImageCardFlip(2);
+                onImageCardFlip(2,imageView2);
                 return false;
             }
         });
@@ -170,11 +180,11 @@ public class FullscreenActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.hide();
         }
-        mControlsView.setVisibility(View.GONE);
+        //mControlsView.setVisibility(View.GONE);
         mVisible = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
+       // mHideHandler.removeCallbacks(mShowPart2Runnable);
         mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
     }
 
@@ -186,7 +196,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
         // Schedule a runnable to display UI elements after a delay
         mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
+     //   mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
     }
 
     /**
@@ -199,8 +209,25 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
 
-    public static void onImageCardFlip( int cardID){
+    public static void onImageCardFlip( int cardID,final ImageView imageView){
         /// animation
+        final ObjectAnimator oa1 = ObjectAnimator.ofFloat(imageView, "scaleX", 1f, 0f);
+        final ObjectAnimator oa2 = ObjectAnimator.ofFloat(imageView, "scaleX", 0f, 1f);
+        oa1.setInterpolator(new DecelerateInterpolator());
+        oa2.setInterpolator(new AccelerateDecelerateInterpolator());
+        oa1.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                imageView.setImageResource(R.drawable.ic_launcher_foreground);
+                oa2.setDuration(1000);
+
+                oa2.start();
+            }
+        });
+        oa1.setDuration(1000);
+
+        oa1.start();
 
         /// get random value
         Random random = new Random();
@@ -213,6 +240,6 @@ public class FullscreenActivity extends AppCompatActivity {
 
         //// check for seq. wins
         //// check for non-seq. wins
-        
+
     }
 }
